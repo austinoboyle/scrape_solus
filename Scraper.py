@@ -10,6 +10,7 @@ import time
 import json
 from config import USER, PASS
 from Course import Course
+from Section import Section
 
 COURSE_CAT_URL = 'https://saself.ps.queensu.ca/psc/saself/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_BROWSE_CATLG_P.GBL'
 LOGIN_URL = 'login.queensu.ca'
@@ -32,6 +33,9 @@ class Scraper(object):
         self.driver.get(COURSE_CAT_URL)
         self.login(user, password)
 
+    def by_id(self, id):
+        return self.driver.find_element_by_id(id)
+
     def default_scrape(self, output_file="data_dump/all.json", start=0, increment=1, deep=False):
         all_courses = []
         for letter in LETTERS:
@@ -48,9 +52,19 @@ class Scraper(object):
         scraped_all = False
         while not scraped_all:
             try:
-                course_link = self.driver.find_element_by_id(
+                course_link = self.by_id(
                     'CRSE_NBR${}'.format(course_num))
-                courses.append(self.get_course_info(course_link, deep=deep))
+                info = self.get_course_info(course_link, deep=deep)
+                try:
+                    if 'options' in info:
+                        print("SCRAPED: {} - {}".format(
+                            info['options'][0]['details']['code'], info['options'][0]['details']['title']))
+                    else:
+                        print(
+                            "SCRAPED: {} - {}".format(info['details']['code'], info['details']['title']))
+                except:
+                    pass
+                courses.append(info)
                 course_num += increment
                 consecutive_errors = 0
             except NoSuchElementException:
@@ -59,38 +73,41 @@ class Scraper(object):
                 print("ERROR SCRAPING COURSE {}, {}".format(course_num, e))
                 consecutive_errors += 1
                 if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
-                    course_num += 1
+                    course_num += increment
                 else:
                     print("RETRYING")
 
         return courses
 
-    def scrape_specific_course(self, letter, course):
+    def scrape_specific_course(self, letter, course, deep=False):
         self.go_to_course_catalogue()
         self.select_letter(letter)
-        course_link = self.driver.find_element_by_id(
+        course_link = self.by_id(
             'CRSE_NBR${}'.format(course))
-        info = self.get_course_info(course_link)
+        info = self.get_course_info(course_link, deep=deep)
         return info
 
     def go_to_course_catalogue(self):
         self.driver.get(COURSE_CAT_URL)
 
     def select_letter(self, letter):
-        button = self.driver.find_element_by_id(
+        print("SELECTING LETTER", letter)
+        button = self.by_id(
             ALPHASEARCH_ID_TEMPLATE.format(letter))
         self.click_and_wait(button)
         self.expand_all()
 
     def login(self, user, password):
+        print("LOGGIN IN...")
         while LOGIN_URL not in self.driver.current_url:
             time.sleep(0.1)
-        username = self.driver.find_element_by_id('username')
-        password = self.driver.find_element_by_id('password')
+        username = self.by_id('username')
+        password = self.by_id('password')
         username.send_keys(USER)
         password.send_keys(PASS)
         password.send_keys(Keys.ENTER)
         self.wait_for_initial_load()
+        print("DONE LOGGING IN")
 
     def get_course_info(self, link, deep=False):
         self.click_and_wait(link)
@@ -103,7 +120,7 @@ class Scraper(object):
             consecutive_errors = 0
             while not retrieved_all_options:
                 try:
-                    course_link = self.driver.find_element_by_id(
+                    course_link = self.by_id(
                         'CAREER${}'.format(option_num))
                     options.append(self.get_course_info(
                         course_link, deep=deep))
@@ -122,29 +139,85 @@ class Scraper(object):
 
             all_info['options'] = options
         else:
-            course_page = self.driver.find_element_by_id(
+            course_page = self.by_id(
                 'win0divPSPAGECONTAINER')
-            all_info = Course(course_page).all_info()
+            all_info = Course(course_page).all_info
+            if deep:
+                sections = self.get_sections()
+                all_info['sections'] = sections
 
         self.click_and_wait(self.return_button)
         return all_info
 
+    def get_sections(self):
+        sections = []
+        view_class_sections_btn = None
+        view_all_btn = None
+        try:
+            view_class_sections_btn = self.by_id(
+                'DERIVED_SAA_CRS_SSR_PB_GO')
+            self.click_and_wait(view_class_sections_btn)
+        except NoSuchElementException:
+            return sections
+
+        try:
+            view_all_btn = self.by_id(
+                'CLASS_TBL_VW5$hviewall$0')
+        except NoSuchElementException:
+            pass
+
+        if view_all_btn:
+            self.click_and_wait(view_all_btn)
+
+        section_num = 0
+        scraped_all_sections = False
+        consecutive_errors = 0
+        while not scraped_all_sections:
+            try:
+                link = self.by_id('CLASS_SECTION${}'.format(section_num))
+                section_name = link.text.split(' ', 2)[0]
+                self.click_and_wait(link)
+                sections.append(
+                    Section(self.by_id('ACE_width'), section_name).all_info)
+                self.click_and_wait(self.return_button)
+                section_num += 1
+            except NoSuchElementException:
+                scraped_all_sections = True
+            except Exception as e:
+                print("ERROR SCRAPING SECTION {}, {}".format(section_num, e))
+                consecutive_errors += 1
+                if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
+                    section_num += 1
+                else:
+                    print("RETRYING")
+                self.click_and_wait(self.return_button)
+
+        return sections
+
     @property
     def return_button(self):
+
+        # Multiple Course Offerings
         if self.page_title == 'Select Course Offering':
-            return self.driver.find_element_by_id('DERIVED_SSS_SEL_RETURN_PB')
+            return self.by_id('DERIVED_SSS_SEL_RETURN_PB')
+
+        # Course Info
         elif self.page_title == 'Course Detail':
-            return self.driver.find_element_by_id('DERIVED_SAA_CRS_RETURN_PB')
+            return self.by_id('DERIVED_SAA_CRS_RETURN_PB')
+
+        # Section Info
+        elif self.page_title == 'Class Details':
+            return self.by_id('CLASS_SRCH_WRK2_SSR_PB_CLOSE')
         else:
             try:
-                return self.driver.find_element_by_id('DERIVED_SAA_CRS_RETURN_PB')
+                return self.by_id('DERIVED_SAA_CRS_RETURN_PB')
             except NoSuchElementException:
                 return None
 
     @property
     def page_title(self):
         try:
-            return self.driver.find_element_by_id('DERIVED_REGFRM1_TITLE1').text
+            return self.by_id('DERIVED_REGFRM1_TITLE1').text
         except NoSuchElementException:
             return None
 
@@ -176,26 +249,22 @@ class Scraper(object):
             time.sleep(0.1)
 
     def click_and_wait(self, el, timeout=60):
-        print("WAITING FOR UPDATE...")
-        oldVal = self.driver.find_element_by_id(
+        oldVal = self.by_id(
             'ICStateNum').get_attribute('value')
         el.click()
         try:
             el = WebDriverWait(self.driver, timeout).until(EC.text_to_be_present_in_element_value(
                 (By.ID, 'ICStateNum'), str(int(oldVal) + 1)
             ))
-            print("FOUND")
             return el
         except TimeoutException:
             print("TIMEOUT EXCEPTION WHILE WAITING")
 
     def wait_for_element(self, selector, timeout=60):
-        print("WAITING FOR ELEMENT: {} .....".format(selector))
         try:
             el = WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, selector)
             ))
-            print("FOUND")
             return el
         except TimeoutException:
             print("UNABLE TO FIND ELEMENT WITH SELECTOR", selector)

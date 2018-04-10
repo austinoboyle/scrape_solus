@@ -72,11 +72,10 @@ class Course(object):
         except NoSuchElementException:
             return ''
 
+    @property
     def all_info(self):
-        info = {
+        return {
             'description': self.description,
             'details': self.details,
             'enrollment_info': self.enrollment_info
         }
-        print("INFO", info)
-        return info
