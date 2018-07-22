@@ -15,10 +15,10 @@ def job(headless=False, output_file="data_dump/all.json", start=0, increment=1, 
 def main():
     NUM_JOBS = 24
     HEADLESS = True
-    logging.basicConfig(
-        format='%(asctime)s--%(levelname)s:%(message)s',
-        datefmt='%m/%d/%Y %I:%M:%S %p',
-        level=logging.INFO)
+    # logging.basicConfig(
+    #     format='%(asctime)s--%(levelname)s:%(message)s',
+    #     datefmt='%m/%d/%Y %I:%M:%S %p',
+    #     level=logging.INFO)
     Parallel(n_jobs=NUM_JOBS)(delayed(job)(
         headless=HEADLESS,
         output_file='data_dump/{}.json'.format(i),

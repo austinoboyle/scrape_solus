@@ -11,13 +11,13 @@ class WindowsInhibitor(object):
 
     def inhibit(self):
         import ctypes
-        logging.info("Preventing Windows from Sleeping")
+        print("Preventing Windows from Sleeping")
         ctypes.windll.kernel32.SetThreadExecutionState(
             WindowsInhibitor.ES_CONTINUOUS | WindowsInhibitor.ES_SYSTEM_REQUIRED
         )
 
     def uninhibit(self):
         import ctypes
-        logging.info("Allowing Windows Computer to go to sleep")
+        print("Allowing Windows Computer to go to sleep")
         ctypes.windll.kernel32.SetThreadExecutionState(
             WindowsInhibitor.ES_CONTINUOUS)

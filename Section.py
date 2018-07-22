@@ -14,7 +14,7 @@ class Section(object):
         try:
             return self.by_id(_id).text
         except NoSuchElementException:
-            logging.warning("NO ELEMENT FOUND WITH ID: {}".format(_id))
+            print("NO ELEMENT FOUND WITH ID: {}".format(_id))
             return default
 
     @property

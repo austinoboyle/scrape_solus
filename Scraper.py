@@ -58,10 +58,10 @@ class Scraper(object):
                 info = self.get_course_info(course_link, deep=deep)
                 try:
                     if 'options' in info:
-                        logging.info("SCRAPED: {} - {}".format(
+                        print("SCRAPED: {} - {}".format(
                             info['options'][0]['details']['code'], info['options'][0]['details']['title']))
                     else:
-                        logging.info(
+                        print(
                             "SCRAPED: {} - {}".format(info['details']['code'], info['details']['title']))
                 except:
                     pass
@@ -71,13 +71,13 @@ class Scraper(object):
             except NoSuchElementException:
                 scraped_all = True
             except Exception as e:
-                logging.error(
+                print(
                     "ERROR SCRAPING COURSE {}, {}".format(course_num, e))
                 consecutive_errors += 1
                 if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
                     course_num += increment
                 else:
-                    logging.info("RETRYING")
+                    print("RETRYING")
 
         return courses
 
@@ -93,14 +93,14 @@ class Scraper(object):
         self.driver.get(COURSE_CAT_URL)
 
     def select_letter(self, letter):
-        logging.info("SELECTING LETTER: {}".format(letter))
+        print("SELECTING LETTER: {}".format(letter))
         button = self.by_id(
             ALPHASEARCH_ID_TEMPLATE.format(letter))
         self.click_and_wait(button)
         self.expand_all()
 
     def login(self, user, password):
-        logging.info("LOGGING IN...")
+        print("LOGGING IN...")
         while LOGIN_URL not in self.driver.current_url:
             time.sleep(0.1)
         username = self.by_id('username')
@@ -109,7 +109,7 @@ class Scraper(object):
         password.send_keys(PASS)
         password.send_keys(Keys.ENTER)
         self.wait_for_initial_load()
-        logging.info("DONE LOGGING IN")
+        print("DONE LOGGING IN")
 
     def get_course_info(self, link, deep=False):
         self.click_and_wait(link)
@@ -131,13 +131,13 @@ class Scraper(object):
                 except NoSuchElementException:
                     retrieved_all_options = True
                 except Exception as e:
-                    logging.error(
+                    print(
                         "ERROR SCRAPING OPTION {}, {}".format(option_num, e))
                     consecutive_errors += 1
                     if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
                         option_num += 1
                     else:
-                        logging.info("RETRYING")
+                        print("RETRYING")
                     self.click_and_wait(self.return_button)
 
             all_info['options'] = options
@@ -169,7 +169,7 @@ class Scraper(object):
             lambda x: x.get_attribute('value'), terms_scheduled))
 
         for term in terms_scheduled:
-            logging.info("TERM: {}".format(term))
+            print("TERM: {}".format(term))
             term_select = Select(self.by_id('DERIVED_SAA_CRS_TERM_ALT'))
             term_select.select_by_value(term)
             show_sections_btn = view_all_btn = None
@@ -201,13 +201,13 @@ class Scraper(object):
                 except NoSuchElementException:
                     scraped_all_sections = True
                 except Exception as e:
-                    logging.error(
+                    print(
                         "ERROR SCRAPING SECTION {}, {}".format(section_num, e))
                     consecutive_errors += 1
                     if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
                         section_num += 1
                     else:
-                        logging.info("RETRYING")
+                        print("RETRYING")
                     self.click_and_wait(self.return_button)
 
         return sections
@@ -276,7 +276,7 @@ class Scraper(object):
             ))
             return el
         except TimeoutException:
-            logging.error("TIMEOUT EXCEPTION WHILE WAITING FOR {}".format(el))
+            print("TIMEOUT EXCEPTION WHILE WAITING FOR {}".format(el))
 
     def wait_for_element(self, selector, timeout=60):
         try:
@@ -285,5 +285,5 @@ class Scraper(object):
             ))
             return el
         except TimeoutException:
-            logging.error(
+            print(
                 "UNABLE TO FIND ELEMENT WITH SELECTOR: {}".format(selector))
