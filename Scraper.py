@@ -1,7 +1,7 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
@@ -152,7 +152,7 @@ class Scraper(object):
     def get_sections(self):
         sections = []
         view_class_sections_btn = None
-        view_all_btn = None
+
         try:
             view_class_sections_btn = self.by_id(
                 'DERIVED_SAA_CRS_SSR_PB_GO')
@@ -160,37 +160,53 @@ class Scraper(object):
         except NoSuchElementException:
             return sections
 
-        try:
-            view_all_btn = self.by_id(
-                'CLASS_TBL_VW5$hviewall$0')
-        except NoSuchElementException:
-            pass
+        terms_scheduled = self.driver.find_elements_by_css_selector(
+            '#DERIVED_SAA_CRS_TERM_ALT option')
+        terms_scheduled = list(map(
+            lambda x: x.get_attribute('value'), terms_scheduled))
 
-        if view_all_btn:
-            self.click_and_wait(view_all_btn)
+        print("TERMS SCHEDULED")
 
-        section_num = 0
-        scraped_all_sections = False
-        consecutive_errors = 0
-        while not scraped_all_sections:
+        for term in terms_scheduled:
+            print("TERM", term)
+            term_select = Select(self.by_id('DERIVED_SAA_CRS_TERM_ALT'))
+            term_select.select_by_value(term)
+            show_sections_btn = view_all_btn = None
             try:
-                link = self.by_id('CLASS_SECTION${}'.format(section_num))
-                section_name = link.text.split(' ', 2)[0]
-                self.click_and_wait(link)
-                sections.append(
-                    Section(self.by_id('ACE_width'), section_name).all_info)
-                self.click_and_wait(self.return_button)
-                section_num += 1
+                show_sections_btn = self.by_id('DERIVED_SAA_CRS_SSR_PB_GO$3$')
+                self.click_and_wait(show_sections_btn)
+            except:
+                continue
+
+            try:
+                view_all_btn = self.by_id(
+                    'CLASS_TBL_VW5$hviewall$0')
+                self.click_and_wait(view_all_btn)
             except NoSuchElementException:
-                scraped_all_sections = True
-            except Exception as e:
-                print("ERROR SCRAPING SECTION {}, {}".format(section_num, e))
-                consecutive_errors += 1
-                if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
+                pass
+
+            section_num = 0
+            scraped_all_sections = False
+            consecutive_errors = 0
+            while not scraped_all_sections:
+                try:
+                    link = self.by_id('CLASS_SECTION${}'.format(section_num))
+                    section_name = link.text.split(' ', 2)[0]
+                    self.click_and_wait(link)
+                    sections.append(
+                        Section(self.by_id('ACE_width'), section_name).all_info)
+                    self.click_and_wait(self.return_button)
                     section_num += 1
-                else:
-                    print("RETRYING")
-                self.click_and_wait(self.return_button)
+                except NoSuchElementException:
+                    scraped_all_sections = True
+                except Exception as e:
+                    print("ERROR SCRAPING SECTION {}, {}".format(section_num, e))
+                    consecutive_errors += 1
+                    if (consecutive_errors >= MAX_CONSECUTIVE_ERRORS):
+                        section_num += 1
+                    else:
+                        print("RETRYING")
+                    self.click_and_wait(self.return_button)
 
         return sections
 
