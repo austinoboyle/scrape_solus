@@ -1,4 +1,5 @@
 from selenium.common.exceptions import NoSuchElementException
+import logging
 
 
 class Section(object):
@@ -6,14 +7,14 @@ class Section(object):
         self.section = section
         self.name = name
 
-    def by_id(self, id):
-        return self.section.find_element_by_id(id)
+    def by_id(self, _id):
+        return self.section.find_element_by_id(_id)
 
-    def id_text(self, id, with_default=True, default="UNKNOWN"):
+    def id_text(self, _id, with_default=True, default="UNKNOWN"):
         try:
-            return self.by_id(id).text
+            return self.by_id(_id).text
         except NoSuchElementException:
-            print("NO ELEMENT FOUND", id)
+            logging.warning("NO ELEMENT FOUND WITH ID: {}".format(_id))
             return default
 
     @property
