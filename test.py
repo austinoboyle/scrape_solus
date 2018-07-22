@@ -11,7 +11,6 @@ def main():
     logging.basicConfig(
         format='%(asctime)s--%(levelname)s:%(message)s',
         datefmt='%m/%d/%Y %I:%M:%S %p',
-        filename='logs/test-{}.log'.format(formatted_time),
         level=logging.INFO)
     scraper = Scraper(headless=HEADLESS)
     course = scraper.scrape_specific_course('M', 32, deep=DEEP)
