@@ -8,7 +8,7 @@ HEADLESS = False
 def main():
     scraper = Scraper(headless=HEADLESS)
     course = scraper.scrape_specific_course('M', 32, deep=DEEP)
-    with open('test.json', 'w') as out:
+    with open('data_dump/test.json', 'w') as out:
         json.dump(course, out)
 
 
