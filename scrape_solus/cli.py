@@ -17,12 +17,16 @@ from .Scraper import Scraper
 def scrape(scrape_type, num_workers, output_dir, deep, headless, letter, course_num):
     if letter:
         scraper = Scraper(headless=headless)
+        letter = letter.upper()
         if course_num is not None:
             results = scraper.scrape_specific_course(
-                letter=letter.upper(), course=course_num, deep=deep)
+                letter=letter, course=course_num, deep=deep)
+            filename = os.path.join(output_dir, '{}.json'.format(letter))
         else:
-            results = scraper.scrape_page_by_letter(letter.upper(), deep=deep)
-        with open(os.path.join(output_dir, 'scrape_results.json'), 'w') as f:
+            filename = os.path.join(
+                output_dir, '{}-{}.json'.format(letter, course_num))
+            results = scraper.scrape_page_by_letter(letter, deep=deep)
+        with open(filename, 'w') as f:
             json.dump(results, f)
 
     else:
