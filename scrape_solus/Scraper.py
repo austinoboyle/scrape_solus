@@ -34,7 +34,7 @@ class Scraper(object):
         self.driver.get(COURSE_CAT_URL)
         self.login(user, password)
         # print("DEFAULT WINDOW SIZE: ", self.driver.get_window_size())
-        self.driver.set_window_size(1000, 700)
+        self.driver.set_window_size(1100, 900)
 
     def by_id(self, id):
         return self.driver.find_element_by_id(id)
@@ -107,13 +107,13 @@ class Scraper(object):
 
     def login(self, user, password):
         print("LOGGING IN...")
-        while LOGIN_URL not in self.driver.current_url:
-            time.sleep(0.1)
-        username = self.by_id('username')
-        password = self.by_id('password')
-        username.send_keys(USER)
-        password.send_keys(PASS)
-        password.send_keys(Keys.ENTER)
+        self.wait_for_element('#username')
+
+        username_input = self.by_id('username')
+        password_input = self.by_id('password')
+        username_input.send_keys(user)
+        password_input.send_keys(password)
+        password_input.send_keys(Keys.ENTER)
         self.wait_for_initial_load()
         print("DONE LOGGING IN")
 
@@ -171,11 +171,11 @@ class Scraper(object):
 
         terms_scheduled = self.driver.find_elements_by_css_selector(
             '#DERIVED_SAA_CRS_TERM_ALT option')
-        terms_scheduled = list(map(
-            lambda x: x.get_attribute('value'), terms_scheduled))
+        terms_scheduled = list(filter(lambda x: int(x) >= 2189, map(
+            lambda x: x.get_attribute('value'), terms_scheduled)))
 
         for term in terms_scheduled:
-            print("TERM: {}".format(term))
+            # print("TERM: {}".format(term))
             term_select = Select(self.by_id('DERIVED_SAA_CRS_TERM_ALT'))
             term_select.select_by_value(term)
             show_sections_btn = view_all_btn = None
