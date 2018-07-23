@@ -17,7 +17,7 @@ from .Scraper import Scraper
 def scrape(scrape_type, num_workers, output_dir, deep, headless, letter, course_num):
     if letter:
         scraper = Scraper(headless=headless)
-        if course_num:
+        if course_num is not None:
             results = scraper.scrape_specific_course(
                 letter=letter.upper(), course=course_num, deep=deep)
         else:
