@@ -21,10 +21,11 @@ def scrape(scrape_type, num_workers, output_dir, deep, headless, letter, course_
         if course_num is not None:
             results = scraper.scrape_specific_course(
                 letter=letter, course=course_num, deep=deep)
-            filename = os.path.join(output_dir, '{}.json'.format(letter))
-        else:
             filename = os.path.join(
                 output_dir, '{}-{}.json'.format(letter, course_num))
+        else:
+            filename = os.path.join(
+                output_dir, '{}.json'.format(letter))
             results = scraper.scrape_page_by_letter(letter, deep=deep)
         with open(filename, 'w') as f:
             json.dump(results, f)
