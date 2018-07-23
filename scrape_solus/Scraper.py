@@ -8,9 +8,9 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 import time
 import json
-from config import USER, PASS
-from Course import Course
-from Section import Section
+from .config import USER, PASS
+from .Course import Course
+from .Section import Section
 #import logging
 
 COURSE_CAT_URL = 'https://saself.ps.queensu.ca/psc/saself/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_BROWSE_CATLG_P.GBL'
@@ -33,6 +33,8 @@ class Scraper(object):
         self.driver = webdriver.Chrome(chrome_options=chrome_options)
         self.driver.get(COURSE_CAT_URL)
         self.login(user, password)
+        # print("DEFAULT WINDOW SIZE: ", self.driver.get_window_size())
+        self.driver.set_window_size(1000, 700)
 
     def by_id(self, id):
         return self.driver.find_element_by_id(id)
@@ -54,7 +56,10 @@ class Scraper(object):
         while not scraped_all:
             try:
                 course_link = self.by_id(
-                    'CRSE_NBR${}'.format(course_num))
+                    'CRSE_TITLE${}'.format(course_num))
+                course_title = course_link.text
+                print("{}: Attempting to scrape {}".format(
+                    self.letter, course_title))
                 info = self.get_course_info(course_link, deep=deep)
                 try:
                     if 'options' in info:
@@ -97,6 +102,7 @@ class Scraper(object):
         button = self.by_id(
             ALPHASEARCH_ID_TEMPLATE.format(letter))
         self.click_and_wait(button)
+        self.letter = letter
         self.expand_all()
 
     def login(self, user, password):
@@ -262,23 +268,22 @@ class Scraper(object):
         except:
             pass
 
-    def wait_infinite(self):
-        while True:
-            time.sleep(0.1)
-
-    def click_and_wait(self, el, timeout=60):
+    def click_and_wait(self, el, timeout=120):
         oldVal = self.by_id(
             'ICStateNum').get_attribute('value')
-        el.click()
         try:
+            el.click()
             el = WebDriverWait(self.driver, timeout).until(EC.text_to_be_present_in_element_value(
                 (By.ID, 'ICStateNum'), str(int(oldVal) + 1)
             ))
             return el
         except TimeoutException:
             print("TIMEOUT EXCEPTION WHILE WAITING FOR {}".format(el))
+        except Exception as e:
+            print("EXCEPTION WHILE CLICKING/WAITING FOR {}".format(el))
+            print(e)
 
-    def wait_for_element(self, selector, timeout=60):
+    def wait_for_element(self, selector, timeout=120):
         try:
             el = WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(
                 (By.CSS_SELECTOR, selector)
