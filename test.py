@@ -1,6 +1,6 @@
 from Scraper import Scraper
 import json
-import logging
+#import logging
 import datetime
 DEEP = True
 HEADLESS = False

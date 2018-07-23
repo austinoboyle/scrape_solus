@@ -1,5 +1,5 @@
 from selenium.common.exceptions import NoSuchElementException
-import logging
+#import logging
 
 
 class Section(object):

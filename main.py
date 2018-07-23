@@ -2,7 +2,7 @@ from Scraper import Scraper
 from joblib import Parallel, delayed
 from SleepInhibitor import WindowsInhibitor
 import os
-import logging
+#import logging
 import datetime
 import sys
 

@@ -11,7 +11,7 @@ import json
 from config import USER, PASS
 from Course import Course
 from Section import Section
-import logging
+#import logging
 
 COURSE_CAT_URL = 'https://saself.ps.queensu.ca/psc/saself/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_BROWSE_CATLG_P.GBL'
 LOGIN_URL = 'login.queensu.ca'
