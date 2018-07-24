@@ -14,7 +14,8 @@ class Section(object):
         try:
             return self.by_id(_id).text
         except NoSuchElementException:
-            print("NO ELEMENT FOUND WITH ID: {}".format(_id))
+            print(
+                "{} - {}: NO ELEMENT WITH ID: {}".format(self.name, self.section, _id))
             return default
 
     @property
@@ -41,17 +42,30 @@ class Section(object):
             'SSR_CLS_DTL_WRK_WAIT_TOT')
 
         for key in availability:
-            availability[key] = int(availability[key])
+            try:
+                availability[key] = int(availability[key])
+            except:
+                availability[key] = 0
 
         return availability
 
     @property
     def meeting_info(self):
-        meeting_info = {}
-        meeting_info['days_and_times'] = self.id_text('MTG_SCHED$0')
-        meeting_info['room'] = self.id_text('MTG_LOC$0')
-        meeting_info['instructor'] = self.id_text('MTG_INSTR$0')
-        meeting_info['dates'] = self.id_text('MTG_DATE$0')
+        meeting_info = []
+        row_num = 1
+        found_all_days = False
+        while not found_all_days:
+            try:
+                row = self.by_id('trSSR_CLSRCH_MTG$0_row{}'.format(row_num))
+                day = {}
+                day['days_and_times'] = self.id_text('MTG_SCHED$0')
+                day['room'] = self.id_text('MTG_LOC$0')
+                day['instructor'] = self.id_text('MTG_INSTR$0')
+                day['dates'] = self.id_text('MTG_DATE$0')
+                meeting_info.append(day)
+                row_num += 1
+            except NoSuchElementException:
+                found_all_days = True
         return meeting_info
 
     @property
