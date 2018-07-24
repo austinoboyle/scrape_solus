@@ -58,10 +58,12 @@ class Section(object):
             try:
                 row = self.by_id('trSSR_CLSRCH_MTG$0_row{}'.format(row_num))
                 day = {}
-                day['days_and_times'] = self.id_text('MTG_SCHED$0')
-                day['room'] = self.id_text('MTG_LOC$0')
-                day['instructor'] = self.id_text('MTG_INSTR$0')
-                day['dates'] = self.id_text('MTG_DATE$0')
+                day['days_and_times'] = self.id_text(
+                    'MTG_SCHED${}'.format(row_num - 1))
+                day['room'] = self.id_text('MTG_LOC${}'.format(row_num - 1))
+                day['instructor'] = self.id_text(
+                    'MTG_INSTR${}'.format(row_num - 1))
+                day['dates'] = self.id_text('MTG_DATE${}'.format(row_num - 1))
                 meeting_info.append(day)
                 row_num += 1
             except NoSuchElementException:
