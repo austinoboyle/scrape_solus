@@ -86,11 +86,16 @@ class Scraper(object):
 
         return courses
 
-    def scrape_specific_course(self, letter, course, deep=False):
+    def scrape_specific_course(self, subject, code, deep=True):
+        subject, code = subject.strip().upper(), str(code).strip().upper()
         self.go_to_course_catalogue()
-        self.select_letter(letter)
-        course_link = self.by_id(
-            'CRSE_NBR${}'.format(course))
+        letter_button = self.by_id(
+            ALPHASEARCH_ID_TEMPLATE.format(subject[0].upper()))
+        self.click_and_wait(letter_button)
+        subject_link = self.driver.find_element_by_partial_link_text(
+            '{} -'.format(subject.upper()))
+        self.click_and_wait(subject_link)
+        course_link = self.driver.find_element_by_partial_link_text(code)
         info = self.get_course_info(course_link, deep=deep)
         return info
 
@@ -188,7 +193,8 @@ class Scraper(object):
             try:
                 view_all_btn = self.by_id(
                     'CLASS_TBL_VW5$hviewall$0')
-                self.click_and_wait(view_all_btn)
+                if view_all_btn.text.strip().lower() == 'view all':
+                    self.click_and_wait(view_all_btn)
             except NoSuchElementException:
                 pass
 
