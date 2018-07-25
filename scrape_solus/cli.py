@@ -5,6 +5,7 @@ import os
 import json
 from .scrape_jobs import scrape as parallel_scrape
 from .Scraper import Scraper
+from .utils import clean as clean_courses
 
 
 @click.command()
@@ -47,3 +48,14 @@ def scrape(scrape_type, num_workers, output_dir, deep, headless, letter, course_
     else:
         parallel_scrape(output_folder=output_dir,
                         scrape_type=scrape_type, processes=num_workers, headless=headless)
+
+
+@click.command()
+@click.option('--data_dir', '-d', type=click.Path(exists=True), default=None)
+@click.option('--output_file', '-o', type=click.Path(), default=os.path.join(os.curdir, 'cleaned.json'))
+def clean(data_dir, output_file):
+    if not data_dir:
+        raise ClickException("Must Expllicitly State Scrape Directory")
+    if os.path.isdir(output_file):
+        raise ClickException("Output must be a file, not a directory.")
+    clean_courses(data_dir, output_file)
