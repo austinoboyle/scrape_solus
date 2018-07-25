@@ -170,7 +170,6 @@ def clean(scrape_dir, output_file, type='alpha'):
             courses = map(fill_with_defaults, courses)
             courses = map(sections_to_offerings, courses)
             courses = list(map(meeting_info_to_array, courses))
-            courses = filter_unique(courses)
             for i in range(len(courses)):
                 courses[i]['code'] = trim_whitespace(
                     courses[i]['details']['code'])
@@ -182,6 +181,7 @@ def clean(scrape_dir, output_file, type='alpha'):
             all_data += courses
 
     with open(output_file, 'w') as f:
+        all_data = filter_unique(all_data)
         all_data.sort(key=lambda x: x['code'])
         # all_data = list(filter(lambda x: x['code'] == 'CISC 235', all_data))
         json.dump(all_data, f)
