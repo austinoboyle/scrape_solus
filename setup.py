@@ -17,7 +17,8 @@ setup(name='scrape_solus',
       packages=['scrape_solus'],
       entry_points={'console_scripts': [
           'scrapesolus=scrape_solus.cli:scrape',
-          'cleancourses=scrape_solus.cli:clean'
+          'cleancourses=scrape_solus.cli:clean',
+          'testsolus=scrape_solus.cli:test'
       ]},
       keywords='selenium scraper web scraping queens',
       #   include_package_data=True,

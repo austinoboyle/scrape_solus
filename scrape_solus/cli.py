@@ -5,7 +5,7 @@ import os
 import json
 from .scrape_jobs import scrape as parallel_scrape
 from .Scraper import Scraper
-from .utils import clean as clean_courses
+from .utils import clean as clean_courses, show_last_courses
 
 
 @click.command()
@@ -59,3 +59,13 @@ def clean(data_dir, output_file):
     if os.path.isdir(output_file):
         raise ClickException("Output must be a file, not a directory.")
     clean_courses(data_dir, output_file)
+
+
+@click.command()
+@click.option('--name', '-n', type=click.Choice(['last']))
+@click.option('--data_dir', '-d', type=click.Path(exists=True), default=None)
+def test(name, data_dir):
+    if not data_dir:
+        raise ClickException("Must explicitly pass data dir")
+    if name == 'last':
+        show_last_courses(data_dir)

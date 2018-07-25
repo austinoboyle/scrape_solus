@@ -12,9 +12,6 @@ def trim_whitespace(string):
     return ' '.join(string.split())
 
 
-import collections
-
-
 def update(d, u):
     for k, v in u.items():
         if isinstance(v, collections.Mapping):
@@ -68,14 +65,18 @@ def obj_to_arr(obj):
 
 def show_last_courses(scrape_dir):
     for c in LETTERS:
-        print("LETTER", c)
+        print("{}: ".format(c), end="")
         with open(os.path.join(scrape_dir, '{}.json'.format(c)), 'r') as f:
             data = json.load(f)
             if data:
                 try:
-                    print(data[-1]['details']['code'])
+                    code = data[-1]['details']['code']
                 except:
-                    print(data[-1]['options'][0]['details']['code'])
+                    code = data[-1]['options'][0]['details']['code']
+
+                code = ' '.join(code.split())
+            else:
+                print("NO COURSES")
 
 
 def get_unique_id(course):
@@ -154,11 +155,10 @@ def clean(scrape_dir, output_file, type='alpha'):
         with open(os.path.join(scrape_dir, fname), 'r') as f:
             courses = json.load(f)
             length = len(courses)
+            courses = map(fill_with_defaults, courses)
+            courses = map(sections_to_offerings, courses)
+            courses = list(map(meeting_info_to_array, courses))
             for i in range(length):
-                courses[i] = fill_with_defaults(courses[i])
-                courses[i] = sections_to_offerings(courses[i])
-                courses[i] = meeting_info_to_array(courses[i])
-                # courses[i]['guid'] = get_unique_id(courses[i])
                 courses[i]['code'] = trim_whitespace(
                     courses[i]['details']['code'])
                 del courses[i]['details']['code']
