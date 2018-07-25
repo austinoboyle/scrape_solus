@@ -75,6 +75,7 @@ def show_last_courses(scrape_dir):
                     code = data[-1]['options'][0]['details']['code']
 
                 code = ' '.join(code.split())
+                print(code)
             else:
                 print("NO COURSES")
 
