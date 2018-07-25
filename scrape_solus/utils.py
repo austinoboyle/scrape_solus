@@ -21,6 +21,18 @@ def update(d, u):
     return d
 
 
+def filter_unique(courses):
+    codes = {}
+    unique = []
+    for course in courses:
+        code = course['code']
+        if code in codes:
+            continue
+        codes[code] = None
+        unique.append(course)
+    return unique
+
+
 def default_course():
     return {
         "description": "",
@@ -155,11 +167,11 @@ def clean(scrape_dir, output_file, type='alpha'):
     for fname in os.listdir(scrape_dir):
         with open(os.path.join(scrape_dir, fname), 'r') as f:
             courses = json.load(f)
-            length = len(courses)
             courses = map(fill_with_defaults, courses)
             courses = map(sections_to_offerings, courses)
             courses = list(map(meeting_info_to_array, courses))
-            for i in range(length):
+            courses = filter_unique(courses)
+            for i in range(len(courses)):
                 courses[i]['code'] = trim_whitespace(
                     courses[i]['details']['code'])
                 del courses[i]['details']['code']
