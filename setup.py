@@ -16,7 +16,9 @@ setup(name='scrape_solus',
       url='https://github.com/austinoboyle/scrape_solus',
       packages=['scrape_solus'],
       entry_points={'console_scripts': [
-          'scrapesolus=scrape_solus.cli:scrape']},
+          'scrapesolus=scrape_solus.cli:scrape',
+          'cleancourses=scrape_solus.cli:clean'
+      ]},
       keywords='selenium scraper web scraping queens',
       #   include_package_data=True,
       #   package_data={'scraper': ['data/*.txt']},
