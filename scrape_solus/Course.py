@@ -42,7 +42,7 @@ class Course(object):
 
             details['career'] = self.id_text(
                 'SSR_CRSE_OFF_VW_ACAD_CAREER$0')
-            details['units'] = self.course.id_text(
+            details['units'] = self.id_text(
                 'DERIVED_CRSECAT_UNITS_RANGE$0')
             details['grading_basis'] = self.id_text(
                 'SSR_CRSE_OFF_VW_GRADING_BASIS$0')
