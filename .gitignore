@@ -106,3 +106,4 @@ config.py
 data_dump/
 .vscode/settings.json
 scrape_solus/config.py
+*.json
