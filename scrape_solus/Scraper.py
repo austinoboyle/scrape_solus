@@ -1,4 +1,5 @@
 from selenium import webdriver
+import os
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -8,7 +9,6 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 import time
 import json
-from .config import USER, PASS
 from .Course import Course
 from .Section import Section
 #import logging
@@ -24,9 +24,15 @@ ALPHASEARCH_ID_TEMPLATE = 'DERIVED_SSS_BCC_SSR_ALPHANUM_{}'
 MAX_CONSECUTIVE_ERRORS = 3
 INCREMENT = 30
 
+USER = os.environ.get('SOLUS_USER')
+PASS = os.environ.get("SOLUS_PASS")
+
 
 class Scraper(object):
     def __init__(self, user=USER, password=PASS, headless=False):
+        if not user or not password:
+            raise Exception(
+                "Must provide username and password to Scraper instance. These default to the SOLUS_USER and SOLUS_PASS env variables.")
         chrome_options = Options()
         if(headless):
             chrome_options.add_argument('--headless')
