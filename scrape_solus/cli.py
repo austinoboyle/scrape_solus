@@ -23,7 +23,7 @@ def scrape(scrape_type, num_workers, output_dir, deep, headless, letter, course_
         try:
             subject, code = tuple(course_code.strip().upper().split(' '))
             results = scraper.scrape_specific_course(
-                subject=subject, code=code)
+                subject=subject, code=code, deep=deep)
             filename = os.path.join(output_dir, '{}.json'.format(course_code))
             with open(filename, 'w') as f:
                 json.dump(results, f)
